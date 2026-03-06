@@ -13,6 +13,8 @@ It runs a **mapper daemon** (evdev → uinput) plus a **GUI editor** for profile
 
 ---
 
+<img src="assets/welcome.png" alt="Synapse Lite GUI" width="800">
+
 ## Dependencies
 
 ### Required
