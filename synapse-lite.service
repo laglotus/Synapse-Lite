@@ -1,0 +1,19 @@
+[Unit]
+Description=Synapse Lite Mapper
+After=graphical-session.target
+Wants=graphical-session.target
+
+[Service]
+Type=simple
+Environment=PATH=%h/.cargo/bin:%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+
+ExecStart=/usr/bin/python3 %h/.local/share/synapse-lite/synapse_lite_mapper.py \
+  --config %h/.config/synapse-lite/config.json \
+  --grab --grab-keyboard --passthrough-modifiers \
+  --pidfile %t/synapse-lite.pid
+
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=default.target

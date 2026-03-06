@@ -1,0 +1,41 @@
+{
+  "active_profile": "default",
+  "profiles": {
+    "default": {
+      "settings": {
+        "panel_layout": "12",
+        "pointer_scale": 1.0,
+        "scroll_scale": 1.0
+      },
+      "bindings": {},
+      "modifier_layers": {
+        "shift": {},
+        "ctrl": {},
+        "alt": {}
+      },
+      "keyboard_bindings": {
+        "normal": {},
+        "shift": {},
+        "ctrl": {},
+        "alt": {}
+      }
+    }
+  },
+  "macros": {},
+  "autoswitch": {
+    "enabled": true,
+    "interval_ms": 500,
+    "fallback_profile": "default",
+    "app_profiles": {}
+  },
+  "global_hotkeys": {
+    "keyboard_bindings": {
+      "normal": {
+        "KEY_F24": {
+          "type": "special",
+          "action": "cycle_subprofile"
+        }
+      }
+    }
+  }
+}
