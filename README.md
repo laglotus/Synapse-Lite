@@ -14,6 +14,11 @@ It runs a **mapper daemon** (evdev → uinput) plus a **GUI editor** for profile
 ---
 
 <img src="assets/welcome.png" alt="Synapse Lite GUI" width="800">
+<img src="assets/mouse.png" alt="Synapse Lite GUI" width="800">
+<img src="assets/keyboard.png" alt="Synapse Lite GUI" width="800">
+<img src="assets/macros.png" alt="Synapse Lite GUI" width="800">
+<img src="assets/switcher.png" alt="Synapse Lite GUI" width="800">
+<img src="assets/rgb.png" alt="Synapse Lite GUI" width="800">
 
 ## Dependencies
 
