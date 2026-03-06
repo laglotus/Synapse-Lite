@@ -1,0 +1,854 @@
+{
+    "active_profile": "Desktop",
+    "auto_switch_enabled": true,
+    "profiles": {
+        "default": {
+            "settings": {
+                "pointer_scale": 1.0,
+                "panel_layout": "6",
+                "scroll_scale": 0.7
+            },
+            "bindings": {
+                "dpi_down": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_LEFTCTRL",
+                        "KEY_LEFTSHIFT",
+                        "KEY_D"
+                    ],
+                    "repeat": false,
+                    "interval": 100
+                },
+                "dpi_up": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_LEFTCTRL",
+                        "KEY_LEFTSHIFT",
+                        "KEY_S"
+                    ],
+                    "repeat": false,
+                    "interval": 100
+                },
+                "middle_click": {
+                    "type": "mouse",
+                    "button": "BTN_MIDDLE"
+                },
+                "thumb6_top_middle": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_Y"
+                    ],
+                    "repeat": false,
+                    "interval": 100
+                },
+                "browse_backward": {
+                    "type": "mouse",
+                    "button": "BTN_EXTRA"
+                },
+                "browse_forward": {
+                    "type": "mouse",
+                    "button": "BTN_SIDE"
+                },
+                "thumb12_bottom_left": {
+                    "type": "mouse",
+                    "button": "BTN_EXTRA"
+                },
+                "thumb12_bottom_middle_left": {
+                    "type": "mouse",
+                    "button": "BTN_SIDE"
+                },
+                "mb4": {
+                    "type": "mouse",
+                    "button": "BTN_EXTRA"
+                },
+                "mb5": {
+                    "type": "mouse",
+                    "button": "BTN_SIDE"
+                },
+                "thumb6_bottom_left": {
+                    "type": "mouse",
+                    "button": "BTN_EXTRA"
+                },
+                "thumb6_bottom_middle": {
+                    "type": "mouse",
+                    "button": "BTN_SIDE"
+                }
+            },
+            "modifier_layers": {
+                "shift": {},
+                "ctrl": {},
+                "alt": {}
+            },
+            "macros": {},
+            "keyboard_bindings": {
+                "normal": {},
+                "shift": {},
+                "ctrl": {},
+                "alt": {}
+            }
+        },
+        "WoW": {
+            "settings": {
+                "pointer_scale": 1.0,
+                "panel_layout": "6",
+                "scroll_scale": 1.5
+            },
+            "bindings": {
+                "browse_backward": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_1"
+                    ],
+                    "repeat": true,
+                    "interval": 100
+                },
+                "browse_forward": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_2"
+                    ],
+                    "repeat": true,
+                    "interval": 100
+                },
+                "bottom_row_right": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_3"
+                    ],
+                    "repeat": true,
+                    "interval": 200
+                },
+                "top_row_left": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_4"
+                    ],
+                    "repeat": true,
+                    "interval": 200
+                },
+                "top_row_middle": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_5"
+                    ],
+                    "repeat": true,
+                    "interval": 200
+                },
+                "top_row_right": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_6"
+                    ],
+                    "repeat": true,
+                    "interval": 200
+                },
+                "wheel_tilt_left": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_7"
+                    ],
+                    "repeat": true,
+                    "interval": 100
+                },
+                "wheel_tilt_right": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_8"
+                    ],
+                    "repeat": true,
+                    "interval": 100
+                },
+                "dpi_up": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_9"
+                    ],
+                    "repeat": true,
+                    "interval": 100
+                },
+                "dpi_down": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_0"
+                    ],
+                    "repeat": true,
+                    "interval": 100
+                },
+                "middle_click": {
+                    "type": "mouse",
+                    "button": "BTN_MIDDLE"
+                },
+                "thumb6_bottom_left": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_2"
+                    ],
+                    "repeat": true,
+                    "interval": 200
+                },
+                "thumb6_bottom_middle": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_1"
+                    ],
+                    "repeat": true,
+                    "interval": 200
+                }
+            },
+            "modifier_layers": {
+                "shift": {},
+                "ctrl": {},
+                "alt": {}
+            },
+            "macros": {},
+            "keyboard_bindings": {
+                "normal": {
+                    "KEY_F9": {
+                        "type": "special",
+                        "action": "cycle_subprofile"
+                    },
+                    "KEY_F24": {
+                        "type": "special",
+                        "action": "cycle_subprofile"
+                    }
+                },
+                "shift": {},
+                "ctrl": {},
+                "alt": {}
+            }
+        },
+        "Games": {
+            "settings": {
+                "pointer_scale": 0.9,
+                "panel_layout": "6",
+                "scroll_scale": 0.9
+            },
+            "bindings": {
+                "bottom_row_right": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_1"
+                    ],
+                    "repeat": false,
+                    "interval": 100
+                },
+                "top_row_left": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_2"
+                    ],
+                    "repeat": false,
+                    "interval": 100
+                },
+                "top_row_middle": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_3"
+                    ],
+                    "repeat": false,
+                    "interval": 100
+                },
+                "top_row_right": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_4"
+                    ],
+                    "repeat": false,
+                    "interval": 100
+                },
+                "wheel_tilt_left": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_5"
+                    ],
+                    "repeat": false,
+                    "interval": 100
+                },
+                "wheel_tilt_right": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_6"
+                    ],
+                    "repeat": false,
+                    "interval": 100
+                },
+                "dpi_up": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_7"
+                    ],
+                    "repeat": false,
+                    "interval": 100
+                },
+                "dpi_down": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_8"
+                    ],
+                    "repeat": false,
+                    "interval": 100
+                },
+                "browse_backward": {
+                    "type": "mouse",
+                    "button": "BTN_SIDE"
+                },
+                "browse_forward": {
+                    "type": "mouse",
+                    "button": "BTN_EXTRA"
+                },
+                "middle_click": {
+                    "type": "mouse",
+                    "button": "BTN_MIDDLE"
+                },
+                "thumb6_bottom_left": {
+                    "type": "mouse",
+                    "button": "BTN_EXTRA"
+                },
+                "thumb6_bottom_middle": {
+                    "type": "mouse",
+                    "button": "BTN_SIDE"
+                }
+            },
+            "modifier_layers": {
+                "shift": {},
+                "ctrl": {},
+                "alt": {}
+            },
+            "macros": {},
+            "keyboard_bindings": {
+                "normal": {},
+                "shift": {},
+                "ctrl": {},
+                "alt": {}
+            }
+        },
+        "L\u00f6tk\u00f6": {
+            "settings": {
+                "pointer_scale": 1.0,
+                "panel_layout": "6",
+                "scroll_scale": 1.0,
+                "subprofile_of": "WoW"
+            },
+            "bindings": {
+                "browse_backward": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_1"
+                    ],
+                    "repeat": true,
+                    "interval": 100
+                },
+                "browse_forward": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_2"
+                    ],
+                    "repeat": true,
+                    "interval": 100
+                },
+                "bottom_row_right": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_3"
+                    ],
+                    "repeat": true,
+                    "interval": 200
+                },
+                "top_row_left": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_4"
+                    ],
+                    "repeat": true,
+                    "interval": 200
+                },
+                "top_row_middle": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_5"
+                    ],
+                    "repeat": true,
+                    "interval": 200
+                },
+                "top_row_right": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_6"
+                    ],
+                    "repeat": true,
+                    "interval": 200
+                },
+                "wheel_tilt_left": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_7"
+                    ],
+                    "repeat": true,
+                    "interval": 100
+                },
+                "wheel_tilt_right": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_8"
+                    ],
+                    "repeat": true,
+                    "interval": 100
+                },
+                "dpi_up": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_9"
+                    ],
+                    "repeat": true,
+                    "interval": 100
+                },
+                "dpi_down": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_0"
+                    ],
+                    "repeat": true,
+                    "interval": 100
+                },
+                "middle_click": {
+                    "type": "mouse",
+                    "button": "BTN_MIDDLE"
+                },
+                "thumb6_bottom_left": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_2"
+                    ],
+                    "repeat": true,
+                    "interval": 200
+                },
+                "thumb6_bottom_middle": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_1"
+                    ],
+                    "repeat": true,
+                    "interval": 200
+                }
+            },
+            "modifier_layers": {
+                "shift": {},
+                "ctrl": {},
+                "alt": {}
+            },
+            "macros": {},
+            "keyboard_bindings": {
+                "normal": {
+                    "KEY_F24": {
+                        "type": "special",
+                        "action": "cycle_subprofile"
+                    }
+                },
+                "shift": {},
+                "ctrl": {},
+                "alt": {}
+            }
+        },
+        "Kuolo": {
+            "settings": {
+                "pointer_scale": 1.0,
+                "panel_layout": "6",
+                "scroll_scale": 1.5,
+                "subprofile_of": "WoW"
+            },
+            "bindings": {
+                "browse_backward": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_1"
+                    ],
+                    "repeat": true,
+                    "interval": 100
+                },
+                "browse_forward": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_2"
+                    ],
+                    "repeat": true,
+                    "interval": 100
+                },
+                "bottom_row_right": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_3"
+                    ],
+                    "repeat": true,
+                    "interval": 200
+                },
+                "top_row_left": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_4"
+                    ],
+                    "repeat": true,
+                    "interval": 200
+                },
+                "top_row_middle": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_5"
+                    ],
+                    "repeat": true,
+                    "interval": 200
+                },
+                "top_row_right": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_6"
+                    ],
+                    "repeat": true,
+                    "interval": 200
+                },
+                "wheel_tilt_left": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_7"
+                    ],
+                    "repeat": true,
+                    "interval": 100
+                },
+                "wheel_tilt_right": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_8"
+                    ],
+                    "repeat": true,
+                    "interval": 100
+                },
+                "dpi_up": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_9"
+                    ],
+                    "repeat": true,
+                    "interval": 100
+                },
+                "dpi_down": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_0"
+                    ],
+                    "repeat": true,
+                    "interval": 100
+                },
+                "middle_click": {
+                    "type": "mouse",
+                    "button": "BTN_MIDDLE"
+                },
+                "thumb6_bottom_left": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_2"
+                    ],
+                    "repeat": true,
+                    "interval": 200
+                },
+                "thumb6_bottom_middle": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_1"
+                    ],
+                    "repeat": true,
+                    "interval": 200
+                }
+            },
+            "modifier_layers": {
+                "shift": {},
+                "ctrl": {},
+                "alt": {}
+            },
+            "macros": {},
+            "keyboard_bindings": {
+                "normal": {
+                    "KEY_SPACE": {
+                        "type": "keyboard",
+                        "keys": [
+                            "KEY_SPACE"
+                        ],
+                        "repeat": true,
+                        "interval": 200
+                    },
+                    "KEY_E": {
+                        "type": "keyboard",
+                        "keys": [
+                            "KEY_E"
+                        ],
+                        "repeat": true,
+                        "interval": 200
+                    },
+                    "KEY_Q": {
+                        "type": "keyboard",
+                        "keys": [
+                            "KEY_Q"
+                        ],
+                        "repeat": true,
+                        "interval": 200
+                    },
+                    "KEY_F24": {
+                        "type": "special",
+                        "action": "cycle_subprofile"
+                    }
+                },
+                "shift": {},
+                "ctrl": {},
+                "alt": {}
+            }
+        },
+        "Desktop": {
+            "settings": {
+                "pointer_scale": 1.0,
+                "panel_layout": "6",
+                "scroll_scale": 0.7,
+                "subprofile_of": "default"
+            },
+            "bindings": {
+                "dpi_down": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_LEFTCTRL",
+                        "KEY_LEFTSHIFT",
+                        "KEY_D"
+                    ],
+                    "repeat": false,
+                    "interval": 100
+                },
+                "dpi_up": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_LEFTCTRL",
+                        "KEY_LEFTSHIFT",
+                        "KEY_S"
+                    ],
+                    "repeat": false,
+                    "interval": 100
+                },
+                "middle_click": {
+                    "type": "mouse",
+                    "button": "BTN_MIDDLE"
+                },
+                "thumb6_top_middle": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_Y"
+                    ],
+                    "repeat": false,
+                    "interval": 100
+                },
+                "browse_backward": {
+                    "type": "mouse",
+                    "button": "BTN_EXTRA"
+                },
+                "browse_forward": {
+                    "type": "mouse",
+                    "button": "BTN_SIDE"
+                },
+                "thumb12_bottom_left": {
+                    "type": "mouse",
+                    "button": "BTN_EXTRA"
+                },
+                "thumb12_bottom_middle_left": {
+                    "type": "mouse",
+                    "button": "BTN_SIDE"
+                },
+                "mb4": {
+                    "type": "mouse",
+                    "button": "BTN_EXTRA"
+                },
+                "mb5": {
+                    "type": "mouse",
+                    "button": "BTN_SIDE"
+                },
+                "thumb6_bottom_left": {
+                    "type": "mouse",
+                    "button": "BTN_EXTRA"
+                },
+                "thumb6_bottom_middle": {
+                    "type": "mouse",
+                    "button": "BTN_SIDE"
+                }
+            },
+            "modifier_layers": {
+                "shift": {},
+                "ctrl": {},
+                "alt": {}
+            },
+            "macros": {},
+            "keyboard_bindings": {
+                "normal": {
+                    "KEY_F24": {
+                        "type": "special",
+                        "action": "cycle_subprofile"
+                    }
+                },
+                "shift": {},
+                "ctrl": {},
+                "alt": {}
+            }
+        },
+        "Default": {
+            "settings": {
+                "pointer_scale": 1.0,
+                "panel_layout": "6",
+                "scroll_scale": 0.7,
+                "subprofile_of": "Games"
+            },
+            "bindings": {
+                "bottom_row_right": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_1"
+                    ],
+                    "repeat": false,
+                    "interval": 100
+                },
+                "top_row_left": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_2"
+                    ],
+                    "repeat": false,
+                    "interval": 100
+                },
+                "top_row_middle": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_3"
+                    ],
+                    "repeat": false,
+                    "interval": 100
+                },
+                "top_row_right": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_4"
+                    ],
+                    "repeat": false,
+                    "interval": 100
+                },
+                "wheel_tilt_left": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_5"
+                    ],
+                    "repeat": false,
+                    "interval": 100
+                },
+                "wheel_tilt_right": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_6"
+                    ],
+                    "repeat": false,
+                    "interval": 100
+                },
+                "dpi_up": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_7"
+                    ],
+                    "repeat": false,
+                    "interval": 100
+                },
+                "dpi_down": {
+                    "type": "keyboard",
+                    "keys": [
+                        "KEY_8"
+                    ],
+                    "repeat": false,
+                    "interval": 100
+                },
+                "browse_backward": {
+                    "type": "mouse",
+                    "button": "BTN_SIDE"
+                },
+                "browse_forward": {
+                    "type": "mouse",
+                    "button": "BTN_EXTRA"
+                },
+                "middle_click": {
+                    "type": "mouse",
+                    "button": "BTN_MIDDLE"
+                },
+                "thumb6_bottom_left": {
+                    "type": "mouse",
+                    "button": "BTN_EXTRA"
+                },
+                "thumb6_bottom_middle": {
+                    "type": "mouse",
+                    "button": "BTN_SIDE"
+                }
+            },
+            "modifier_layers": {
+                "shift": {},
+                "ctrl": {},
+                "alt": {}
+            },
+            "macros": {},
+            "keyboard_bindings": {
+                "normal": {
+                    "KEY_F24": {
+                        "type": "special",
+                        "action": "cycle_subprofile"
+                    }
+                },
+                "shift": {},
+                "ctrl": {},
+                "alt": {}
+            }
+        }
+    },
+    "app_profiles": {
+        "steam_app_0": "WoW"
+    },
+    "app_names": {},
+    "rgb": {
+        "enabled": true,
+        "mouse_device": 2,
+        "keyboard_device": 3,
+        "per_profile": {
+            "default": "#aaffff",
+            "WoW": "#aa0000",
+            "Games": "#00aa00",
+            "L\u00f6tk\u00f6": "#4f2c95",
+            "Kuolo": "#b65b00",
+            "testi": "#cdfffd",
+            "Desktop": "#cdfaff",
+            "Default": "#00aa00"
+        },
+        "brightness": 40
+    },
+    "rgb_idle": {
+        "enabled": true,
+        "wake_on_activity": true,
+        "dim_enabled": true,
+        "dim_after_seconds": 3,
+        "dim_brightness_percent": 30,
+        "off_enabled": true,
+        "off_after_seconds": 600,
+        "timeout_seconds": 600
+    },
+    "fallback_profile": "default",
+    "autoswitch_interval_ms": 350,
+    "pointer_scale": 1.0,
+    "scroll_scale": 0.7,
+    "macros": {
+        "WoW/_placeholder": {
+            "name": "_placeholder",
+            "folder": "WoW",
+            "steps": [],
+            "hidden": true
+        }
+    },
+    "last_subprofiles": {
+        "WoW": "L\u00f6tk\u00f6",
+        "default": "Desktop",
+        "Games": "Default"
+    },
+    "manual_profile_lock": true
+}
