@@ -2491,6 +2491,21 @@ class MainWindow(QtWidgets.QMainWindow):
         )
         rgb_layout.addWidget(self.rgb_enable_cb)
 
+        # Profile selector for RGB editing (cascading menu: base profiles -> subprofiles)
+        rgb_prof_row = QtWidgets.QHBoxLayout()
+        rgb_layout.addLayout(rgb_prof_row)
+        rgb_prof_row.addWidget(QtWidgets.QLabel("Edit RGB for:"))
+
+        self.rgb_profile_btn = QtWidgets.QToolButton()
+        self.rgb_profile_btn.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+        self.rgb_profile_btn.setToolButtonStyle(QtCore.Qt.ToolButtonTextOnly)
+        self.rgb_profile_btn.setMinimumWidth(260)
+        self.rgb_profile_menu = QtWidgets.QMenu(self)
+        self.rgb_profile_btn.setMenu(self.rgb_profile_menu)
+        rgb_prof_row.addWidget(self.rgb_profile_btn)
+        rgb_prof_row.addStretch(1)
+
+
         dev_row = QtWidgets.QGridLayout()
         rgb_layout.addLayout(dev_row)
 
@@ -2575,6 +2590,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.rgb_pick_btn = QtWidgets.QPushButton("Choose…")
         color_row.addWidget(self.rgb_pick_btn)
+
+        self.rgb_save_btn = QtWidgets.QPushButton("Save")
+        self.rgb_save_btn.setToolTip("Save config changes without forcing a hardware apply")
+        self.rgb_save_btn.clicked.connect(lambda _=False: self.on_save_apply())
+        color_row.addWidget(self.rgb_save_btn)
 
         self.rgb_apply_btn = QtWidgets.QPushButton("Apply now")
         color_row.addWidget(self.rgb_apply_btn)
@@ -2677,6 +2697,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # rgb ui init
         self.on_rgb_refresh_devices(silent=True)
+        try:
+            self._rgb_refresh_profile_menu()
+        except Exception:
+            pass
         self._rgb_update_preview()
         self._rgb_status("", ok=True)
         if self.rgb_enable_cb.isChecked():
@@ -3083,6 +3107,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.profile_pick.blockSignals(False)
             except Exception:
                 pass
+
+        # RGB tab profile selector
+        try:
+            self._rgb_refresh_profile_menu()
+        except Exception:
+            pass
 
     def current_profile(self) -> str:
         # Effective profile for UI editing/preview. May differ from cfg['active_profile'] until Set Active.
@@ -3901,20 +3931,7 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception:
             default_prof = "default"
         try:
-                        # If selecting a subprofile of the fallback/default base, do not lock autoswitch.
-            try:
-                profs = self.cfg.get("profiles") or {}
-                base = (profs.get(prof, {}).get("settings") or {}).get("subprofile_of")
-                if base and str(base) == str(default_prof):
-                    prof_is_defaultish = True
-                else:
-                    prof_is_defaultish = (str(prof) == str(default_prof))
-            except Exception:
-                prof_is_defaultish = (str(prof) == str(default_prof))
-
-            # Unlock autoswitch when selecting fallback/default (or its subprofiles); lock otherwise.
-            self.cfg["manual_profile_lock"] = (not prof_is_defaultish)
-
+            self.cfg["manual_profile_lock"] = (str(prof) != str(default_prof))
         except Exception:
             pass
 
@@ -4133,6 +4150,95 @@ class MainWindow(QtWidgets.QMainWindow):
             self._push_recent_class(cls)
 
     # ---------- RGB (OpenRGB sync) ----------
+
+    def _rgb_edit_profile_name(self) -> str:
+        """Which profile's RGB settings the RGB tab is editing. None => Active."""
+        try:
+            p = getattr(self, "_rgb_edit_profile", None)
+            if p:
+                return str(p)
+        except Exception:
+            pass
+        return self.current_profile()
+
+    def _rgb_set_edit_profile(self, prof):
+        """Set the RGB edit target (does not change active profile)."""
+        try:
+            self._rgb_edit_profile = (str(prof) if prof else None)
+        except Exception:
+            self._rgb_edit_profile = None
+        try:
+            self._rgb_refresh_profile_menu()
+        except Exception:
+            pass
+        try:
+            self._rgb_update_preview()
+        except Exception:
+            pass
+
+    def _rgb_refresh_profile_menu(self) -> None:
+        """Rebuild the cascading RGB profile menu."""
+        if not hasattr(self, "rgb_profile_menu"):
+            return
+
+        profs = (self.cfg.get("profiles") or {})
+        if not isinstance(profs, dict):
+            profs = {}
+
+        subs_by_base = {}
+        bases = set()
+        for name, pdata in profs.items():
+            settings = (pdata.get("settings") or {}) if isinstance(pdata, dict) else {}
+            base = settings.get("subprofile_of")
+            if base:
+                subs_by_base.setdefault(str(base), []).append(str(name))
+                bases.add(str(base))
+            else:
+                bases.add(str(name))
+
+        try:
+            autoswitch_cfg = self.cfg.get("autoswitch") or {}
+            fallback_prof = (
+                self.cfg.get("fallback_profile")
+                or autoswitch_cfg.get("fallback_profile")
+                or self.cfg.get("default_profile")
+                or ("Desktop" if "Desktop" in bases else None)
+                or "default"
+            )
+        except Exception:
+            fallback_prof = "default"
+
+        ordered_bases = list(bases)
+        ordered_bases.sort(key=lambda x: (0 if x == fallback_prof else 1, _synapse_name_sort_key(x)))
+
+        cur = getattr(self, "_rgb_edit_profile", None)
+        self.rgb_profile_btn.setText("Active (current)" if not cur else str(cur))
+
+        menu = self.rgb_profile_menu
+        menu.clear()
+
+        act_active = menu.addAction("Active (current)")
+        act_active.triggered.connect(lambda _=False: self._rgb_set_edit_profile(None))
+        menu.addSeparator()
+
+        for b in ordered_bases:
+            subs = sorted(subs_by_base.get(b, []), key=_synapse_name_sort_key)
+            if subs:
+                subm = menu.addMenu(b)
+                base_act = subm.addAction(f"{b} (base)")
+                base_act.triggered.connect(lambda _=False, bb=b: self._rgb_set_edit_profile(bb))
+                subm.addSeparator()
+                for s in subs:
+                    a = subm.addAction(s)
+                    a.triggered.connect(lambda _=False, ss=s: self._rgb_set_edit_profile(ss))
+            else:
+                a = menu.addAction(b)
+                a.triggered.connect(lambda _=False, bb=b: self._rgb_set_edit_profile(bb))
+
+        if cur and cur not in profs:
+            self._rgb_edit_profile = None
+            self.rgb_profile_btn.setText("Active (current)")
+
 
     def _rgb_status(self, msg: str, ok: bool = True):
         self.rgb_status_lbl.setText(msg)
@@ -4474,7 +4580,7 @@ class MainWindow(QtWidgets.QMainWindow):
         return str(per.get(profile, "#000000"))
 
     def _rgb_update_preview(self):
-        col = self._rgb_color_for_profile(self.current_profile())
+        col = self._rgb_color_for_profile(self._rgb_edit_profile_name())
         self.rgb_color_preview.setStyleSheet(
             f"background: {col}; border: 1px solid #444;"
         )
@@ -4495,7 +4601,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.rgb_bright_spin.blockSignals(False)
 
     def on_rgb_pick_color(self):
-        current = QtGui.QColor(self._rgb_color_for_profile(self.current_profile()))
+        current = QtGui.QColor(self._rgb_color_for_profile(self._rgb_edit_profile_name()))
         col = QtWidgets.QColorDialog.getColor(current, self, "Choose profile color")
         if not col.isValid():
             return
@@ -4511,7 +4617,7 @@ class MainWindow(QtWidgets.QMainWindow):
             },
         )
         per = rgb.setdefault("per_profile", {})
-        per[self.current_profile()] = hexcol
+        per[self._rgb_edit_profile_name()] = hexcol
         self._rgb_update_preview()
         self.set_status("RGB color updated (not saved yet).", ok=True)
         if rgb.get("enabled"):
@@ -4540,7 +4646,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self._rgb_status("Pick mouse + keyboard devices, then Apply.", ok=False)
             return
 
-        hexcol = self._rgb_color_for_profile(self.current_profile())
+        hexcol = self._rgb_color_for_profile(self._rgb_edit_profile_name())
         rgbv = self._hex_to_rgb(hexcol)
         if not rgbv:
             self._rgb_status(f"Invalid color: {hexcol}", ok=False)

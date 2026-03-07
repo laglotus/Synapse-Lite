@@ -2,199 +2,107 @@ LICENSE: GPL-3.0-or-later
 
 # Synapse Lite (Linux)
 
-Synapse Lite is a lightweight, Linux replacement for Synapse-style mouse software (only naga pro v2 officially supported at the moment)
+Synapse Lite is a lightweight Linux replacement for Synapse-style mouse software (Naga-first):
+- Layered bindings (Normal / Shift / Ctrl / Alt) with non-interfering precedence
+- Macro playback (repeat modes, overlap prevention, stuck-key safety)
+- GUI editor for profiles/bindings/macros
+- User-level systemd service (no root required)
 
-It runs a **mapper daemon** (evdev → uinput) plus a **GUI editor** for profiles, bindings, and macros.
 
-**Highlights**
-- Device detection (Razer Naga V2 Pro tested)
-- Layered bindings with non-interfering precedence: **Shift → Ctrl → Alt → Normal**
-- Macro engine (repeat/stop modes + overlap prevention + stuck-key safety)
-- GUI editor for profiles / bindings / macros
-- Per-profile persistence
-- **Global hotkey support** (for naga pro v2 the bottom button cycles subprofiles by default)
 
-**On the works if requested**
-- Support for more devices
-- Update from the GUI
-- More rgb options, breath etc
+## Quick install (recommended)
 
-  <img src="assets/welcome.png" alt="Synapse Lite GUI" width="800">
-  <img src="assets/mouse.png" alt="Synapse Lite GUI" width="800">
-  <img src="assets/keyboard.png" alt="Synapse Lite GUI" width="800">
-  <img src="assets/macros.png" alt="Synapse Lite GUI" width="800">
-  <img src="assets/switcher.png" alt="Synapse Lite GUI" width="800">
-  <img src="assets/rgb.png" alt="Synapse Lite GUI" width="800">
+From the project folder:
 
----
-
-## Dependencies
-### Required
-- Python 3
-- systemd user services (`systemctl --user`)
-- Linux input + uinput access (`/dev/input/event*`, `/dev/uinput`)
-- OpenRGB
-### Optional
-- `kdotool` (only needed for autoswitch / active window polling on KDE/Wayland)
-
----
-
-# ----Install dependencies----
-# ** Ubuntu / Debian **
-### Python 3
-```bash
-sudo apt update
-sudo apt install -y python3 python3-venv
-```
-
-### kdotool via Cargo
-```bash
-sudo apt install -y cargo
-cargo install kdotool
-~/.cargo/bin/kdotool --help
-```
-
-### OpenRGB install (recommended: Flatpak, works on most distros)
-
-##### Install Flatpak (if you don’t have it)
-```bash
-sudo apt update && sudo apt install -y flatpak
-```
-##### Add Flathub + install OpenRGB
-```bash
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-flatpak install -y flathub org.openrgb.OpenRGB
-```
-##### Run
-```bash
-flatpak run org.openrgb.OpenRGB
-```
-
----
-
-# ** Fedora **
-### Python 3 + Kdotool
-```bash
-sudo dnf install -y python3 kdotool
-```
-
-### OpenRGB install (recommended: Flatpak, works on most distros)
-
-##### Install Flatpak (if you don’t have it)
-```bash
-sudo dnf install -y flatpak
-```
-##### Add Flathub + install OpenRGB
-```bash
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-flatpak install -y flathub org.openrgb.OpenRGB
-```
-##### Run
-```bash
-flatpak run org.openrgb.OpenRGB
-```
-
----
-
-# ** Arch / Manjaro **
-### Python 3
-```bash
-sudo pacman -S --needed python
-```
-
-### kdotool via AUR
-```bash
-yay -S kdotool
-```
-##### or
-```bash
-paru -S kdotool
-```
-### kdotool via Cargo
-```bash
-sudo pacman -S --needed rust cargo
-cargo install kdotool
-```
-
-### OpenRGB install (recommended: Flatpak, works on most distros)
-
-##### Install Flatpak (if you don’t have it)
-```bash
-sudo pacman -S --needed flatpak
-```
-##### Add Flathub + install OpenRGB
-```bash
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-flatpak install -y flathub org.openrgb.OpenRGB
-```
-##### Run
-```bash
-flatpak run org.openrgb.OpenRGB
-```
-
----
-
-# ----Input permissions----
-
-### Option A (recommended) — udev rule
-```bash
-sudo tee /etc/udev/rules.d/99-synapse-lite.rules >/dev/null <<'EOF'
-# Allow access to uinput for user-space virtual devices
-KERNEL=="uinput", MODE="0660", GROUP="input", OPTIONS+="static_node=uinput"
-
-# Broad rule: allow read access to event devices (all keyboards/mice).
-# For tighter rules, restrict by vendor/product for your device(s).
-KERNEL=="event*", SUBSYSTEM=="input", MODE="0660", GROUP="input"
-EOF
-
-sudo udevadm control --reload-rules
-sudo udevadm trigger
-```
-##### reload udev rules
-```bash
-sudo udevadm control --reload-rules
-sudo udevadm trigger
-```
-##### Relog or reboot and check 
-```bash
-groups | grep -q input && echo "OK: in input group" || echo "Not in input group"
-```
-
-### Option B — add user to input group
-```bash
-sudo usermod -aG input "$USER"
-```
-##### Relog or reboot and check 
-```bash
-groups | grep -q input && echo "OK: in input group" || echo "Not in input group"
-```
-
----
-
-# ----Install Synapse Lite----
-### From the project folder with install.sh file
 ```bash
 chmod +x install.sh
 ./install.sh
 ```
-### Service status / restart / logs
+
+This will:
+- install files to `~/.local/share/synapse-lite/`
+- install systemd user units to `~/.config/systemd/user/`
+- enable + start the mapper service: `synapse-lite.service`
+- install a desktop launcher: `Synapse Lite`
+
+### Optional: enable external profile switcher (advanced)
+By default it is **disabled** (recommended). To enable it:
+
 ```bash
-systemctl --user status synapse-lite.service --no-pager
-systemctl --user restart synapse-lite.service
-journalctl --user -u synapse-lite.service -n 120 --no-pager
+./install.sh --enable-switcher
 ```
-### Launch GUI
+
+## Launch
+
+- From your desktop/app launcher: **Synapse Lite**
+- Or from a terminal:
+
 ```bash
 python3 ~/.local/share/synapse-lite/synapse_lite_gui.py
 ```
 
-# ----Uninstall----
-### From the project folder with uninstall.sh file
+## Service management
+
+```bash
+systemctl --user status synapse-lite.service --no-pager
+systemctl --user restart synapse-lite.service
+systemctl --user stop synapse-lite.service
+```
+
+External switcher (optional):
+
+```bash
+systemctl --user status synapse-lite-profile-switcher.service --no-pager
+systemctl --user enable --now synapse-lite-profile-switcher.service
+systemctl --user disable --now synapse-lite-profile-switcher.service
+```
+
+## Config locations
+
+Primary config (new path):
+- `~/.config/synapse-lite/config.json`
+
+Legacy configs may be migrated/seeded on first run if the new config is missing:
+- `~/.config/razer-mouse-control-center/config.json`
+- `~/.config/naga-synapse-lite/config.json`
+
+## Troubleshooting
+
+### Buttons don’t remap / you get “double actions”
+- Make sure the mapper is running:
+  ```bash
+  systemctl --user status synapse-lite.service --no-pager
+  ```
+- Ensure the service uses `--grab` (exclusive grab), so the physical device doesn’t also act normally.
+
+### Permission denied reading `/dev/input/event*`
+- Your user typically needs access via the `input` group (varies by distro).
+- After adding your user to the right group, log out/in.
+
+### Macros stuck keys / weird state
+- Restart the mapper:
+  ```bash
+  systemctl --user restart synapse-lite.service
+  ```
+
+### GUI can’t find images / hotspots
+- Ensure `~/.local/share/synapse-lite/assets/` exists and contains:
+  - `startpage.png`
+  - `mouse_panel_overlays.json`
+  - `kblayout_hotspots.json`
+
+## Uninstall
+
+From the project folder:
+
 ```bash
 chmod +x uninstall.sh
 ./uninstall.sh
 ```
-### Remove config (optional)
-```bash
-rm -rf ~/.config/synapse-lite
-```
+
+This removes:
+- `~/.local/share/synapse-lite/`
+- user systemd units
+- desktop launcher entry
+
+Your config at `~/.config/synapse-lite/` is **left in place** (you can choose to delete it manually).
