@@ -14,12 +14,9 @@ It runs a **mapper daemon** (evdev → uinput) plus a **GUI editor** for profile
 - **Global hotkey support** (for naga pro v2 the bottom button cycles subprofiles by default)
 
 **On the works if requested**
-
--Support for more devices
-
--Update from the GUI
-
--More rgb options, breath etc
+- Support for more devices
+- Update from the GUI
+- More rgb options, breath etc
 
   <img src="assets/welcome.png" alt="Synapse Lite GUI" width="800">
   <img src="assets/mouse.png" alt="Synapse Lite GUI" width="800">
