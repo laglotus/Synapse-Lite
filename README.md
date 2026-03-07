@@ -2,7 +2,7 @@ LICENSE: GPL-3.0-or-later
 
 # Synapse Lite (Linux)
 
-Synapse Lite is a lightweight, Linux replacement for Synapse-style mouse software (only naga pro v2 officially supported at the moment..  
+Synapse Lite is a lightweight, Linux replacement for Synapse-style mouse software (only naga pro v2 officially supported at the moment)
 It runs a **mapper daemon** (evdev → uinput) plus a **GUI editor** for profiles, bindings, and macros.
 
 **Highlights**
