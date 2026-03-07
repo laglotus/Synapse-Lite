@@ -40,10 +40,8 @@ It runs a **mapper daemon** (evdev → uinput) plus a **GUI editor** for profile
 ### Optional
 - `kdotool` (only needed for autoswitch / active window polling on KDE/Wayland)
 
-### Ubuntu / Debian
 ---
 
-**Python 3**
 # ----Install dependencies----
 # ** Ubuntu / Debian **
 ### Python 3
