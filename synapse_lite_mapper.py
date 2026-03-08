@@ -452,6 +452,7 @@ def get_active_window_class() -> Optional[str]:
             timeout=0.4,
         )
         cls = (out or "").strip()
+        cls = cls.lower()
         return cls or None
     except Exception:
         return None
@@ -508,8 +509,9 @@ def _resolve_autoswitch_profile(target: str) -> str:
 
     If 'target' is a base profile that has subprofiles, prefer:
       1) CONFIG['last_subprofiles'][target] if it is a valid subprofile_of target
-      2) if there is exactly one subprofile, use it
-      3) otherwise keep the base profile
+      2) if current active_profile is a subprofile_of target, keep it
+      3) if there is exactly one subprofile, use it
+      4) otherwise use the first subprofile (stable sorted) instead of the empty base
     """
     try:
         profs = CONFIG.get("profiles") or {}
@@ -531,21 +533,32 @@ def _resolve_autoswitch_profile(target: str) -> str:
         if not subs:
             return base
 
-        # Prefer last_subprofiles mapping
+        subs = sorted(subs, key=_synapse_name_sort_key)
+
+        # 1) Prefer last_subprofiles mapping
         last = CONFIG.get("last_subprofiles") or {}
         if isinstance(last, dict):
             cand = last.get(base)
             if isinstance(cand, str) and cand in subs:
                 return cand
 
-        # If only one subprofile exists, use it
+        # 2) If currently active is a subprofile_of this base, keep it
+        try:
+            cur = str(CONFIG.get("active_profile", "default") or "default")
+            if cur in subs:
+                return cur
+        except Exception:
+            pass
+
+        # 3) If only one subprofile exists, use it
         if len(subs) == 1:
             return subs[0]
 
-        # Otherwise keep base (user can pick which subprofile to prefer)
-        return base
+        # 4) Otherwise use first subprofile (avoids landing on empty base)
+        return subs[0]
     except Exception:
         return str(target)
+
 
 
 def autoswitch_tick(rgb_worker=None) -> None:
@@ -575,12 +588,12 @@ def autoswitch_tick(rgb_worker=None) -> None:
     cls = get_active_window_class()
     if cls is not None:
         cls = str(cls).strip().lower()
-    mapping = CONFIG.get("app_profiles") or {}
+    mapping = CONFIG.get("app_profiles") or (CONFIG.get("autoswitch") or {}).get("app_profiles") or {}
     try:
         mapping_lc = {str(k).strip().lower(): v for k, v in (mapping or {}).items()}
     except Exception:
         mapping_lc = mapping or {}
-    fallback = str(CONFIG.get("fallback_profile", "default") or "default")
+    fallback = str((CONFIG.get("fallback_profile") or (CONFIG.get("autoswitch") or {}).get("fallback_profile") or "default") or "default")
 
     # If we couldn't read the active window class, still allow fallback switching.
     if cls is None:
@@ -1919,12 +1932,26 @@ class Mapper:
         binding = resolve_keyboard_binding(key_name)
 
         if not binding:
-            # Global hotkeys (apply to all profiles unless overridden)
+            # Global hotkeys fallback (apply to all profiles unless overridden)
             try:
-                gh = (self.cfg.get("global_hotkeys") or {})
+                gh = (CONFIG.get("global_hotkeys") or {})
                 gh_kb = (gh.get("keyboard_bindings") or {})
-                gh_layer = (gh_kb.get(layer_name) or {})
-                binding = gh_layer.get(key_name)
+                # Resolve layer by current modifier state (same priority as resolve_keyboard_binding)
+                ghn = gh_kb.get("normal") or gh_kb.get("NORMAL") or {}
+                ghs = gh_kb.get("shift")  or gh_kb.get("SHIFT")  or {}
+                ghc = gh_kb.get("ctrl")   or gh_kb.get("CTRL")   or {}
+                gha = gh_kb.get("alt")    or gh_kb.get("ALT")    or {}
+
+                if MODIFIER_STATE.get("shift") and isinstance(ghs, dict) and isinstance(ghs.get(key_name), dict):
+                    binding = ghs.get(key_name) or {}
+                elif MODIFIER_STATE.get("ctrl") and isinstance(ghc, dict) and isinstance(ghc.get(key_name), dict):
+                    binding = ghc.get(key_name) or {}
+                elif MODIFIER_STATE.get("alt") and isinstance(gha, dict) and isinstance(gha.get(key_name), dict):
+                    binding = gha.get(key_name) or {}
+                elif isinstance(ghn, dict) and isinstance(ghn.get(key_name), dict):
+                    binding = ghn.get(key_name) or {}
+                else:
+                    binding = None
             except Exception:
                 binding = None
         if not binding:
@@ -2255,8 +2282,16 @@ def main() -> None:
     # Migration/fallback: if the new config path does not exist yet, fall back to the legacy
     # synapse-lite config and (best-effort) seed the new location.
     if not os.path.exists(cfg_path):
-        legacy_path = os.path.expanduser(f"~/.config/{LEGACY_APP_ID}/config.json")
-        if os.path.exists(legacy_path):
+        legacy_path = None
+        for _old_id in (LEGACY_APP_IDS if isinstance(LEGACY_APP_IDS, (list, tuple)) else [LEGACY_APP_IDS]):
+            try:
+                _p = os.path.expanduser(f"~/.config/{_old_id}/config.json")
+                if os.path.exists(_p):
+                    legacy_path = _p
+                    break
+            except Exception:
+                continue
+        if legacy_path and os.path.exists(legacy_path):
             try:
                 os.makedirs(os.path.dirname(cfg_path), exist_ok=True)
                 # Keep legacy as backup; seed the new location.
