@@ -6,6 +6,7 @@ Wants=graphical-session.target
 [Service]
 Type=simple
 Environment=PATH=%h/.cargo/bin:%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=NAGA_OPENRGB_PREFER_FLATPAK=1
 
 ExecStart=/usr/bin/python3 %h/.local/share/synapse-lite/synapse_lite_mapper.py \
   --config %h/.config/synapse-lite/config.json \
