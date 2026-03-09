@@ -673,6 +673,7 @@ def _apply_layout_change(w, layout: str) -> None:
         pass
     _sync_layout_buttons(w)
     _update_panel_preview(w)
+APP_VERSION = "v1.3.0"
 APP_ID = "synapse-lite"
 LEGACY_APP_IDS = ['razer-mouse-control-center', 'naga-synapse-lite']
 SERVICE_NAME = "synapse-lite.service"
@@ -1804,16 +1805,43 @@ class MainWindow(QtWidgets.QMainWindow):
         wlay.addWidget(self.welcome_image, alignment=QtCore.Qt.AlignCenter)
 
         self.welcome_version = QtWidgets.QLabel("")
+        self.welcome_version.setText(f"Version: {APP_VERSION}")
         self.welcome_version.setAlignment(QtCore.Qt.AlignCenter)
         font = self.welcome_version.font()
         font.setPointSize(font.pointSize() + 2)
         self.welcome_version.setFont(font)
-        self.welcome_version.hide()
+        self.welcome_version.show()
         wlay.addWidget(self.welcome_version)
+        # GitHub link + update check
+        link_row = QtWidgets.QHBoxLayout()
+        wlay.addLayout(link_row)
+        link_row.addStretch(1)
+        self.welcome_github_link = QtWidgets.QLabel('<a href="https://github.com/laglotus/Synapse-Lite">https://github.com/laglotus/Synapse-Lite</a>')
+        self.welcome_github_link.setTextFormat(QtCore.Qt.RichText)
+        self.welcome_github_link.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction)
+        self.welcome_github_link.setOpenExternalLinks(True)
+        self.welcome_github_link.setAlignment(QtCore.Qt.AlignCenter)
+        link_row.addWidget(self.welcome_github_link)
+        link_row.addStretch(1)
+
+        btn_row = QtWidgets.QHBoxLayout()
+        wlay.addLayout(btn_row)
+        btn_row.addStretch(1)
+        self.welcome_update_btn = QtWidgets.QPushButton("Check updates…")
+        self.welcome_update_btn.setToolTip("Show latest GitHub release and open the Releases page.")
+        btn_row.addWidget(self.welcome_update_btn)
+        btn_row.addStretch(1)
+
 
         wlay.addStretch(2)
 
         self.tabs.addTab(self.welcome_tab, "Welcome")
+
+        # Welcome: update check
+        try:
+            self.welcome_update_btn.clicked.connect(lambda _=False: self._welcome_check_updates())
+        except Exception:
+            pass
 
         # Shrink left tab bar width (~20%) after layout settles
         QtCore.QTimer.singleShot(
@@ -2704,6 +2732,61 @@ class MainWindow(QtWidgets.QMainWindow):
             QtGui.QPalette.WindowText, QtGui.QColor("#00ff00" if ok else "#ff5555")
         )
         self.status.setPalette(pal)
+
+
+
+    def _welcome_check_updates(self) -> None:
+        """Fetch latest GitHub release info and compare with APP_VERSION."""
+        import json
+        import urllib.request
+
+        api = "https://api.github.com/repos/laglotus/Synapse-Lite/releases/latest"
+        latest_tag = None
+        latest_date = None
+        try:
+            req = urllib.request.Request(api, headers={"User-Agent": "Synapse-Lite"})
+            with urllib.request.urlopen(req, timeout=8) as r:
+                data = json.loads(r.read().decode("utf-8", "replace"))
+            latest_tag = str(data.get("tag_name") or "").strip() or None
+            latest_date = str(data.get("published_at") or "").strip() or None
+        except Exception as e:
+            QtWidgets.QMessageBox.warning(
+                self,
+                "Updates",
+                "Could not check GitHub for updates.\n\n"
+                f"Error: {e}\n\n"
+                "You can still check releases manually."
+            )
+            try:
+                QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://github.com/laglotus/Synapse-Lite/releases"))
+            except Exception:
+                pass
+            return
+
+        cur = str(APP_VERSION)
+        msg = f"Current version: {cur}\n"
+        if latest_tag:
+            msg += f"Latest release: {latest_tag}\n"
+            if latest_date:
+                msg += f"Published: {latest_date}\n"
+            msg += "\n"
+            msg += ("✅ You are up to date." if latest_tag == cur else "⬆️ Update available.")
+        else:
+            msg += "Could not read latest tag from GitHub."
+
+        box = QtWidgets.QMessageBox(self)
+        box.setWindowTitle("Updates")
+        box.setIcon(QtWidgets.QMessageBox.Information)
+        box.setText(msg)
+        open_btn = box.addButton("Open Releases", QtWidgets.QMessageBox.AcceptRole)
+        box.addButton("Close", QtWidgets.QMessageBox.RejectRole)
+        box.exec_()
+
+        if box.clickedButton() == open_btn:
+            try:
+                QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://github.com/laglotus/Synapse-Lite/releases"))
+            except Exception:
+                pass
 
 
 
