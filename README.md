@@ -32,6 +32,7 @@ It runs a **mapper daemon** (evdev → uinput) plus a **GUI editor** for profile
 
 
 ## Dependencies
+### Have only 1 onboard profile and make it use default settings in synapse in windows. If you have never used your mouse in windows before or never made profiles you can disregard this.
 ### Required
 - Python 3
 - systemd user services (`systemctl --user`)
