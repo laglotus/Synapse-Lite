@@ -673,7 +673,6 @@ def _apply_layout_change(w, layout: str) -> None:
         pass
     _sync_layout_buttons(w)
     _update_panel_preview(w)
-APP_VERSION = "v1.3.0"
 APP_ID = "synapse-lite"
 LEGACY_APP_IDS = ['razer-mouse-control-center', 'naga-synapse-lite']
 SERVICE_NAME = "synapse-lite.service"
@@ -1805,43 +1804,16 @@ class MainWindow(QtWidgets.QMainWindow):
         wlay.addWidget(self.welcome_image, alignment=QtCore.Qt.AlignCenter)
 
         self.welcome_version = QtWidgets.QLabel("")
-        self.welcome_version.setText(f"Version: {APP_VERSION}")
         self.welcome_version.setAlignment(QtCore.Qt.AlignCenter)
         font = self.welcome_version.font()
         font.setPointSize(font.pointSize() + 2)
         self.welcome_version.setFont(font)
-        self.welcome_version.show()
+        self.welcome_version.hide()
         wlay.addWidget(self.welcome_version)
-        # GitHub link + update check
-        link_row = QtWidgets.QHBoxLayout()
-        wlay.addLayout(link_row)
-        link_row.addStretch(1)
-        self.welcome_github_link = QtWidgets.QLabel('<a href="https://github.com/laglotus/Synapse-Lite">https://github.com/laglotus/Synapse-Lite</a>')
-        self.welcome_github_link.setTextFormat(QtCore.Qt.RichText)
-        self.welcome_github_link.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction)
-        self.welcome_github_link.setOpenExternalLinks(True)
-        self.welcome_github_link.setAlignment(QtCore.Qt.AlignCenter)
-        link_row.addWidget(self.welcome_github_link)
-        link_row.addStretch(1)
-
-        btn_row = QtWidgets.QHBoxLayout()
-        wlay.addLayout(btn_row)
-        btn_row.addStretch(1)
-        self.welcome_update_btn = QtWidgets.QPushButton("Check updates…")
-        self.welcome_update_btn.setToolTip("Show latest GitHub release and open the Releases page.")
-        btn_row.addWidget(self.welcome_update_btn)
-        btn_row.addStretch(1)
-
 
         wlay.addStretch(2)
 
         self.tabs.addTab(self.welcome_tab, "Welcome")
-
-        # Welcome: update check
-        try:
-            self.welcome_update_btn.clicked.connect(lambda _=False: self._welcome_check_updates())
-        except Exception:
-            pass
 
         # Shrink left tab bar width (~20%) after layout settles
         QtCore.QTimer.singleShot(
@@ -2594,6 +2566,14 @@ class MainWindow(QtWidgets.QMainWindow):
         rgb_layout.addLayout(color_row)
         color_row.addWidget(QtWidgets.QLabel("Current profile color:"))
 
+        self.rgb_profile_btn = QtWidgets.QToolButton()
+        self.rgb_profile_btn.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+        self.rgb_profile_btn.setToolButtonStyle(QtCore.Qt.ToolButtonTextOnly)
+        self.rgb_profile_btn.setText("Profile: default")
+        self.rgb_profile_menu = QtWidgets.QMenu(self.rgb_profile_btn)
+        self.rgb_profile_btn.setMenu(self.rgb_profile_menu)
+        color_row.addWidget(self.rgb_profile_btn)
+
         self.rgb_color_preview = QtWidgets.QLabel("      ")
         self.rgb_color_preview.setFixedWidth(70)
         self.rgb_color_preview.setStyleSheet(
@@ -2603,6 +2583,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.rgb_pick_btn = QtWidgets.QPushButton("Choose…")
         color_row.addWidget(self.rgb_pick_btn)
+
+        self.rgb_save_btn = QtWidgets.QPushButton("Save RGB")
+        color_row.addWidget(self.rgb_save_btn)
 
         self.rgb_apply_btn = QtWidgets.QPushButton("Apply now")
         color_row.addWidget(self.rgb_apply_btn)
@@ -2662,6 +2645,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.rgb_mouse_combo.currentIndexChanged.connect(self.on_rgb_device_changed)
         self.rgb_kb_combo.currentIndexChanged.connect(self.on_rgb_device_changed)
         self.rgb_pick_btn.clicked.connect(self.on_rgb_pick_color)
+        self.rgb_save_btn.clicked.connect(self.on_rgb_save_only)
         self.rgb_apply_btn.clicked.connect(self.on_rgb_apply_now)
 
         self.rgb_idle_cb.toggled.connect(self.on_rgb_idle_toggled)
@@ -2732,61 +2716,6 @@ class MainWindow(QtWidgets.QMainWindow):
             QtGui.QPalette.WindowText, QtGui.QColor("#00ff00" if ok else "#ff5555")
         )
         self.status.setPalette(pal)
-
-
-
-    def _welcome_check_updates(self) -> None:
-        """Fetch latest GitHub release info and compare with APP_VERSION."""
-        import json
-        import urllib.request
-
-        api = "https://api.github.com/repos/laglotus/Synapse-Lite/releases/latest"
-        latest_tag = None
-        latest_date = None
-        try:
-            req = urllib.request.Request(api, headers={"User-Agent": "Synapse-Lite"})
-            with urllib.request.urlopen(req, timeout=8) as r:
-                data = json.loads(r.read().decode("utf-8", "replace"))
-            latest_tag = str(data.get("tag_name") or "").strip() or None
-            latest_date = str(data.get("published_at") or "").strip() or None
-        except Exception as e:
-            QtWidgets.QMessageBox.warning(
-                self,
-                "Updates",
-                "Could not check GitHub for updates.\n\n"
-                f"Error: {e}\n\n"
-                "You can still check releases manually."
-            )
-            try:
-                QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://github.com/laglotus/Synapse-Lite/releases"))
-            except Exception:
-                pass
-            return
-
-        cur = str(APP_VERSION)
-        msg = f"Current version: {cur}\n"
-        if latest_tag:
-            msg += f"Latest release: {latest_tag}\n"
-            if latest_date:
-                msg += f"Published: {latest_date}\n"
-            msg += "\n"
-            msg += ("✅ You are up to date." if latest_tag == cur else "⬆️ Update available.")
-        else:
-            msg += "Could not read latest tag from GitHub."
-
-        box = QtWidgets.QMessageBox(self)
-        box.setWindowTitle("Updates")
-        box.setIcon(QtWidgets.QMessageBox.Information)
-        box.setText(msg)
-        open_btn = box.addButton("Open Releases", QtWidgets.QMessageBox.AcceptRole)
-        box.addButton("Close", QtWidgets.QMessageBox.RejectRole)
-        box.exec_()
-
-        if box.clickedButton() == open_btn:
-            try:
-                QtGui.QDesktopServices.openUrl(QtCore.QUrl("https://github.com/laglotus/Synapse-Lite/releases"))
-            except Exception:
-                pass
 
 
 
@@ -3167,6 +3096,13 @@ class MainWindow(QtWidgets.QMainWindow):
             except Exception:
                 pass
 
+        try:
+            if not getattr(self, "_rgb_effective_profile", None):
+                self._rgb_effective_profile = self.current_profile()
+            self._refresh_rgb_profile_menu()
+        except Exception:
+            pass
+
     def current_profile(self) -> str:
         # Effective profile for UI editing/preview. May differ from cfg['active_profile'] until Set Active.
         eff = getattr(self, "_ui_effective_profile", None)
@@ -3174,6 +3110,68 @@ class MainWindow(QtWidgets.QMainWindow):
             return str(eff)
         return str(self.cfg.get("active_profile") or self.profile_combo.currentText() or "default")
 
+    def _rgb_target_profile(self) -> str:
+        target = getattr(self, "_rgb_effective_profile", None)
+        if target:
+            return str(target)
+        return self.current_profile()
+
+    def _rgb_profile_button_text(self, effective: str) -> str:
+        profs = self.cfg.get("profiles") or {}
+        settings = ((profs.get(effective) or {}).get("settings") or {}) if isinstance(profs.get(effective), dict) else {}
+        base = str(settings.get("subprofile_of") or effective or "default")
+        if effective and effective != base:
+            return f"Profile: {base} ▸ {effective}"
+        return f"Profile: {base or 'default'}"
+
+    def _refresh_rgb_profile_menu(self) -> None:
+        if not hasattr(self, "rgb_profile_menu"):
+            return
+        profs = self.cfg.get("profiles") or {}
+        all_profiles = list(profs.keys())
+        if not all_profiles:
+            return
+
+        def _is_subprofile(p: str) -> bool:
+            return bool((((profs.get(p) or {}).get("settings") or {}).get("subprofile_of")))
+
+        base_profiles = [p for p in all_profiles if not _is_subprofile(p)]
+        default_name = str(self.cfg.get("default_profile") or "default")
+        if default_name in base_profiles:
+            base_profiles = [default_name] + sorted([p for p in base_profiles if p != default_name], key=_synapse_name_sort_key)
+        else:
+            base_profiles = sorted(base_profiles, key=_synapse_name_sort_key)
+
+        self.rgb_profile_menu.clear()
+        current = self.current_profile()
+        for base in base_profiles:
+            subs = self._subprofiles_for_base(base)
+            if subs:
+                submenu = self.rgb_profile_menu.addMenu(base)
+                act_base = submenu.addAction(base)
+                act_base.triggered.connect(lambda _=False, b=base: self._select_rgb_profile_target(b, ""))
+                submenu.addSeparator()
+                for sub in subs:
+                    act = submenu.addAction(sub)
+                    act.triggered.connect(lambda _=False, b=base, s=sub: self._select_rgb_profile_target(b, s))
+            else:
+                act = self.rgb_profile_menu.addAction(base)
+                act.triggered.connect(lambda _=False, b=base: self._select_rgb_profile_target(b, ""))
+
+        try:
+            current = self._rgb_target_profile()
+            self.rgb_profile_btn.setText(self._rgb_profile_button_text(current))
+        except Exception:
+            pass
+
+    def _select_rgb_profile_target(self, base: str, sub: str = "") -> None:
+        try:
+            effective = sub if (sub and sub in self._subprofiles_for_base(base)) else base
+            self._rgb_effective_profile = effective
+            self._rgb_update_preview()
+            self._refresh_rgb_profile_menu()
+        except Exception:
+            pass
 
     def base_profile(self) -> str:
         return self.profile_combo.currentText() or "default"
@@ -3257,12 +3255,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self._populate_subprofiles_combo(base, selected=selected)
         effective = selected or base
         self._set_ui_effective_profile(effective)
+        try:
+            self._refresh_rgb_profile_menu()
+        except Exception:
+            pass
 
     def _on_subprofile_changed(self, sub: str) -> None:
         base = self.base_profile()
         subs = self._subprofiles_for_base(base)
         effective = sub if (sub and sub in subs) else base
         self._set_ui_effective_profile(effective)
+        try:
+            self._refresh_rgb_profile_menu()
+        except Exception:
+            pass
 
     def add_subprofile(self) -> None:
         base = self.base_profile()
@@ -3952,24 +3958,67 @@ class MainWindow(QtWidgets.QMainWindow):
         if res != QtWidgets.QMessageBox.Yes:
             return
 
-        self.cfg["profiles"].pop(prof, None)
+        profs = self.cfg.get("profiles") or {}
+        deleted_is_base = not bool(((profs.get(prof, {}).get("settings") or {}).get("subprofile_of")))
 
-        if self.cfg.get("active_profile") == prof:
-            remaining = list(self.cfg["profiles"].keys())
+        # Remove the selected profile.
+        profs.pop(prof, None)
+
+        # If deleting a base profile, also remove its subprofiles so they cannot
+        # linger in last_subprofiles or autoswitch resolution.
+        if deleted_is_base:
+            sub_to_del = []
+            for name, pdata in list(profs.items()):
+                settings = (pdata or {}).get("settings") or {}
+                if str(settings.get("subprofile_of") or "") == prof:
+                    sub_to_del.append(name)
+            for name in sub_to_del:
+                profs.pop(name, None)
+
+        remaining = list(profs.keys())
+        if self.cfg.get("active_profile") == prof or self.cfg.get("active_profile") not in profs:
             self.cfg["active_profile"] = remaining[0] if remaining else "default"
 
-        # remove app mappings that point to deleted profile
+        # Remove autoswitch mappings that point to the deleted profile.
         app_profiles = self.cfg.get("app_profiles", {}) or {}
-        to_del = [cls for cls, p in app_profiles.items() if p == prof]
+        to_del = [cls for cls, p in list(app_profiles.items()) if p == prof]
         for cls in to_del:
             app_profiles.pop(cls, None)
             (self.cfg.get("app_names", {}) or {}).pop(cls, None)
         self.cfg["app_profiles"] = app_profiles
 
+        # Nested autoswitch schema compatibility.
+        autoswitch = self.cfg.get("autoswitch") or {}
+        if isinstance(autoswitch, dict):
+            amap = autoswitch.get("app_profiles") or {}
+            if isinstance(amap, dict):
+                for cls, p in list(amap.items()):
+                    if p == prof:
+                        amap.pop(cls, None)
+            if autoswitch.get("fallback_profile") == prof:
+                autoswitch["fallback_profile"] = self.cfg.get("active_profile", "default")
+            self.cfg["autoswitch"] = autoswitch
+
+        # Prune remembered subprofiles that point to removed profiles or removed bases.
+        last = self.cfg.get("last_subprofiles") or {}
+        if isinstance(last, dict):
+            last.pop(prof, None)
+            for base, sub in list(last.items()):
+                if base not in profs or sub not in profs:
+                    last.pop(base, None)
+            self.cfg["last_subprofiles"] = last
+
+        # Persist immediately so closing/restarting the GUI cannot bring the profile back.
+        atomic_write_json(self.config_path, self.cfg)
+
         self.refresh_profiles()
         self.refresh_table()
         self.refresh_mapping_table()
-        self.set_status(f"Deleted profile '{prof}' (not saved yet).", ok=True)
+        try:
+            self.refresh_keyboard_table()
+        except Exception:
+            pass
+        self.set_status(f"Deleted profile '{prof}'.", ok=True)
 
     def on_set_active(self):
         # Commit the selected (possibly subprofile) as the active runtime profile.
@@ -4557,7 +4606,7 @@ class MainWindow(QtWidgets.QMainWindow):
         return str(per.get(profile, "#000000"))
 
     def _rgb_update_preview(self):
-        col = self._rgb_color_for_profile(self.current_profile())
+        col = self._rgb_color_for_profile(self._rgb_target_profile())
         self.rgb_color_preview.setStyleSheet(
             f"background: {col}; border: 1px solid #444;"
         )
@@ -4578,7 +4627,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.rgb_bright_spin.blockSignals(False)
 
     def on_rgb_pick_color(self):
-        current = QtGui.QColor(self._rgb_color_for_profile(self.current_profile()))
+        current = QtGui.QColor(self._rgb_color_for_profile(self._rgb_target_profile()))
         col = QtWidgets.QColorDialog.getColor(current, self, "Choose profile color")
         if not col.isValid():
             return
@@ -4594,11 +4643,16 @@ class MainWindow(QtWidgets.QMainWindow):
             },
         )
         per = rgb.setdefault("per_profile", {})
-        per[self.current_profile()] = hexcol
+        per[self._rgb_target_profile()] = hexcol
+        # Update only the RGB tab preview here. Do not live-apply on color pick,
+        # otherwise a pending apply can make Save RGB look like it changed the
+        # active devices even though the user only wanted to store the color.
         self._rgb_update_preview()
-        self.set_status("RGB color updated (not saved yet).", ok=True)
-        if rgb.get("enabled"):
-            self._rgb_apply_timer.start(120)
+        try:
+            self._rgb_apply_timer.stop()
+        except Exception:
+            pass
+        self.set_status("RGB color updated (not saved or applied yet).", ok=True)
 
     def _hex_to_rgb(self, hexcol: str) -> Optional[Tuple[int, int, int]]:
         s = (hexcol or "").strip()
@@ -4623,7 +4677,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self._rgb_status("Pick mouse + keyboard devices, then Apply.", ok=False)
             return
 
-        hexcol = self._rgb_color_for_profile(self.current_profile())
+        hexcol = self._rgb_color_for_profile(self._rgb_target_profile())
         rgbv = self._hex_to_rgb(hexcol)
         if not rgbv:
             self._rgb_status(f"Invalid color: {hexcol}", ok=False)
@@ -4859,6 +4913,42 @@ class MainWindow(QtWidgets.QMainWindow):
         ok = bool(ok_sig) or bool(ok_rst)
         msg = f"reload: {msg_sig}; restart: {msg_rst}"
         self.set_status(f"Saved changes. ({msg})", ok=ok)
+
+    def on_rgb_save_only(self):
+        target = self._rgb_target_profile()
+        # Saving RGB should never trigger a delayed live apply from an earlier
+        # color/device/brightness edit.
+        try:
+            self._rgb_apply_timer.stop()
+        except Exception:
+            pass
+        try:
+            with open(self.config_path, "r", encoding="utf-8") as f:
+                disk_cfg = json.load(f)
+            if not isinstance(disk_cfg, dict):
+                disk_cfg = {}
+        except Exception:
+            disk_cfg = {}
+
+        rgb_src = self.cfg.get("rgb") or {}
+        rgb_dst = disk_cfg.setdefault("rgb", {})
+        rgb_dst["enabled"] = bool(rgb_src.get("enabled", False))
+        rgb_dst["mouse_device"] = rgb_src.get("mouse_device")
+        rgb_dst["keyboard_device"] = rgb_src.get("keyboard_device")
+        try:
+            rgb_dst["brightness"] = int(rgb_src.get("brightness", 100))
+        except Exception:
+            rgb_dst["brightness"] = 100
+
+        per_src = rgb_src.get("per_profile") or {}
+        per_dst = rgb_dst.setdefault("per_profile", {})
+        if not isinstance(per_dst, dict):
+            per_dst = {}
+            rgb_dst["per_profile"] = per_dst
+        per_dst[target] = str(per_src.get(target, "#000000"))
+
+        atomic_write_json(self.config_path, disk_cfg)
+        self.set_status(f"Saved RGB for {target}.", ok=True)
 
     def _apply_rgb_background(self):
         try:

@@ -124,14 +124,36 @@ def _clamp_scale(v: float) -> float:
     return max(0.10, min(3.00, v))
 
 
+def _prepare_config_for_save(data: dict) -> dict:
+    out = dict(data if isinstance(data, dict) else {})
+    auto = out.get("autoswitch")
+    if not isinstance(auto, dict):
+        auto = {}
+    enabled = auto.get("enabled", out.get("auto_switch_enabled", True))
+    app_profiles = auto.get("app_profiles", out.get("app_profiles", {}))
+    fallback = auto.get("fallback_profile", out.get("fallback_profile", out.get("default_profile", "default")))
+    if not isinstance(app_profiles, dict):
+        app_profiles = {}
+    out["autoswitch"] = {
+        "enabled": bool(enabled),
+        "app_profiles": dict(app_profiles),
+        "fallback_profile": str(fallback or "default"),
+    }
+    out.pop("auto_switch_enabled", None)
+    out.pop("app_profiles", None)
+    out.pop("fallback_profile", None)
+    return out
+
+
 def _atomic_write_json(path: str, data: dict) -> None:
     import tempfile
 
     directory = os.path.dirname(path) or "."
     fd, tmp = tempfile.mkstemp(prefix=".cfg.", dir=directory)
+    payload = _prepare_config_for_save(data)
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=4, sort_keys=False)
+            json.dump(payload, f, indent=4, sort_keys=False)
             f.write("\n")
             f.flush()
             os.fsync(f.fileno())
@@ -216,6 +238,24 @@ def load_config(path: str) -> None:
 
     if not isinstance(CONFIG, dict):
         CONFIG = {}
+
+    auto = CONFIG.get("autoswitch")
+    if not isinstance(auto, dict):
+        auto = {}
+    enabled = auto.get("enabled", CONFIG.get("auto_switch_enabled", True))
+    app_profiles = auto.get("app_profiles", CONFIG.get("app_profiles", {}))
+    fallback = auto.get("fallback_profile", CONFIG.get("fallback_profile", CONFIG.get("default_profile", "default")))
+    if not isinstance(app_profiles, dict):
+        app_profiles = {}
+    CONFIG["autoswitch"] = {
+        "enabled": bool(enabled),
+        "app_profiles": dict(app_profiles),
+        "fallback_profile": str(fallback or "default"),
+    }
+    # Keep compatibility mirrors in memory for older code paths.
+    CONFIG["auto_switch_enabled"] = bool(CONFIG["autoswitch"]["enabled"])
+    CONFIG["app_profiles"] = dict(CONFIG["autoswitch"]["app_profiles"])
+    CONFIG["fallback_profile"] = str(CONFIG["autoswitch"]["fallback_profile"])
 
     prof = str(CONFIG.get("active_profile", "default") or "default")
     PROFILE_BINDINGS = (CONFIG.get("profiles") or {}).get(prof, {}).get(
@@ -564,12 +604,13 @@ def _resolve_autoswitch_profile(target: str) -> str:
 def autoswitch_tick(rgb_worker=None) -> None:
     """Poll active window class and switch profiles on a timer.
 
-    - Uses CONFIG['app_profiles'] mapping: {window_class: profile_name}
-    - If class is unmapped, falls back to 'default' (or CONFIG['fallback_profile']).
+    - Uses CONFIG['autoswitch']['app_profiles'] mapping: {window_class: profile_name}
+    - If class is unmapped, falls back to the configured autoswitch fallback profile.
     """
     global _AUTOSWITCH_LAST_T, _AUTOSWITCH_LAST_CLASS, _AUTOSWITCH_LAST_TARGET, _AUTOSWITCH_STABLE_COUNT
 
-    if not bool(CONFIG.get("auto_switch_enabled", False)):
+    auto = CONFIG.get("autoswitch") or {}
+    if not bool(auto.get("enabled", CONFIG.get("auto_switch_enabled", False))):
         return
     # Manual lock: when user has Set Active to a non-default profile, suppress autoswitch
     # until they Set Active back to default.
@@ -588,12 +629,12 @@ def autoswitch_tick(rgb_worker=None) -> None:
     cls = get_active_window_class()
     if cls is not None:
         cls = str(cls).strip().lower()
-    mapping = CONFIG.get("app_profiles") or (CONFIG.get("autoswitch") or {}).get("app_profiles") or {}
+    mapping = auto.get("app_profiles", {}) or CONFIG.get("app_profiles") or {}
     try:
         mapping_lc = {str(k).strip().lower(): v for k, v in (mapping or {}).items()}
     except Exception:
         mapping_lc = mapping or {}
-    fallback = str((CONFIG.get("fallback_profile") or (CONFIG.get("autoswitch") or {}).get("fallback_profile") or "default") or "default")
+    fallback = str((auto.get("fallback_profile") or CONFIG.get("fallback_profile") or "default") or "default")
 
     # If we couldn't read the active window class, still allow fallback switching.
     if cls is None:

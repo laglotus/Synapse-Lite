@@ -78,10 +78,65 @@ def load_config() -> dict:
 def save_config(cfg: dict) -> None:
     os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
     tmp = CONFIG_PATH + ".tmp"
+    payload = _prepare_config_for_save(cfg)
     with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(cfg, f, indent=2, sort_keys=True)
+        json.dump(payload, f, indent=2, sort_keys=True)
         f.write("\n")
     os.replace(tmp, CONFIG_PATH)
+
+
+def _resolve_autoswitch_block(cfg: dict) -> dict:
+    auto = cfg.get("autoswitch")
+    if not isinstance(auto, dict):
+        auto = {}
+    enabled = auto.get("enabled", cfg.get("auto_switch_enabled", True))
+    app_profiles = auto.get("app_profiles", cfg.get("app_profile_map") or cfg.get("app_profiles") or {})
+    fallback = auto.get("fallback_profile", cfg.get("fallback_profile", cfg.get("default_profile", "default")))
+    if not isinstance(app_profiles, dict):
+        app_profiles = {}
+    return {
+        "enabled": bool(enabled),
+        "app_profiles": {str(k).strip().lower(): v for k, v in app_profiles.items()},
+        "fallback_profile": str(fallback or "default"),
+    }
+
+
+def _resolve_target_profile(cfg: dict, target: str) -> str:
+    profiles = cfg.get("profiles") or {}
+    if not isinstance(profiles, dict):
+        return str(target or "default")
+    base = str(target or "default")
+    if base not in profiles:
+        return base
+    subs = []
+    for name, pdata in profiles.items():
+        if not isinstance(pdata, dict):
+            continue
+        settings = pdata.get("settings") or {}
+        if isinstance(settings, dict) and str(settings.get("subprofile_of") or "") == base:
+            subs.append(str(name))
+    if not subs:
+        return base
+    subs = sorted(subs, key=lambda s: s.casefold())
+    last = cfg.get("last_subprofiles") or {}
+    if isinstance(last, dict):
+        cand = last.get(base)
+        if isinstance(cand, str) and cand in subs:
+            return cand
+    cur = str(cfg.get("active_profile", "") or "")
+    if cur in subs:
+        return cur
+    return subs[0]
+
+
+def _prepare_config_for_save(cfg: dict) -> dict:
+    out = dict(cfg if isinstance(cfg, dict) else {})
+    out["autoswitch"] = _resolve_autoswitch_block(out)
+    out.pop("auto_switch_enabled", None)
+    out.pop("app_profiles", None)
+    out.pop("app_profile_map", None)
+    out.pop("fallback_profile", None)
+    return out
 
 
 def restart_mapper() -> Tuple[bool, str]:
@@ -116,11 +171,17 @@ def main() -> None:
                 time.sleep(POLL_SEC)
                 continue
 
-            # Support both historical key names.
-            amap = (cfg.get("app_profile_map") or cfg.get("app_profiles") or {})
-            target = amap.get(app)
+            auto = _resolve_autoswitch_block(cfg)
+            if not auto.get("enabled", True):
+                time.sleep(POLL_SEC)
+                continue
 
-            cur = cfg.get("active_profile", "")
+            target = auto.get("app_profiles", {}).get(app)
+            if target is None:
+                target = auto.get("fallback_profile", "default")
+            target = _resolve_target_profile(cfg, str(target or "default"))
+
+            cur = str(cfg.get("active_profile", "") or "")
             if target and target != cur:
                 profiles = cfg.get("profiles") or {}
                 if target not in profiles:
@@ -129,6 +190,12 @@ def main() -> None:
                     continue
 
                 cfg["active_profile"] = target
+                try:
+                    base = ((cfg.get("profiles") or {}).get(target, {}).get("settings") or {}).get("subprofile_of")
+                    if base:
+                        cfg.setdefault("last_subprofiles", {})[str(base)] = target
+                except Exception:
+                    pass
                 try:
                     save_config(cfg)
                 except Exception as e:
